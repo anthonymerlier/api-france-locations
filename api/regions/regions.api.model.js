@@ -7,7 +7,16 @@ const RegionModel = new mongoose.Schema(
         },
         nom_region: {
             type: String
-        }
+        },
+        geometry: {
+            type: Object,
+            type: {
+                type: String
+            },
+            coordinates: {
+                type: Array
+            }
+        },
     },
     {
         collection: 'france_regions',

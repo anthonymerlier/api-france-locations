@@ -7,6 +7,7 @@ import './config/db.js'
 import locationsRoutes from './api/locations/location.api.routes.js'
 import departmentsRoutes from './api/departments/departments.api.routes.js'
 import regionsRoutes from './api/regions/regions.api.routes.js'
+import newRegionsRoutes from './api/new-regions/new_regions.api.routes.js'
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(bodyParser.json({ limit: '50mb' }))
 app.use('/api/locations', locationsRoutes)
 app.use('/api/departments', departmentsRoutes)
 app.use('/api/regions', regionsRoutes)
+app.use('/api/regions/new', newRegionsRoutes)
 
 if (process.env.NODE_ENV !== 'production') {
     process.once('uncaughtException', err => {

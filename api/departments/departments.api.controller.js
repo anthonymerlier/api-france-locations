@@ -17,7 +17,7 @@ export const getAllDepartments = (req, res) => {
 
 /**
  * Get department by name
- * @param {*} department Name of the department
+ * @param {string} department - Name of the department
  */
 
 export const getDepartment = (req, res) => {
@@ -38,15 +38,15 @@ export const getDepartment = (req, res) => {
 
 /**
  * Find departments from query
- * @param {*} query Query to find departments
- * @param {*} limit Limit the number of element returned (?limit=)
- * @param {*} sort Sort the response by this field (?sort=)
+ * @param {string} query - Query to find departments
+ * @param {number} limit - Limit the number of element returned (?limit=)
+ * @param {string} sort - Sort the response by this field (?sort=)
  */
 
 export const findDepartments = (req, res) => {
     const queries = {
-        limit: req.query.limit ?  Number(req.query.limit) : 15,
-        sort: req.query.sort ?  (req.query.sort).toString() : 'nom_departement'
+        limit: req.query.limit ? Number(req.query.limit) : 15,
+        sort: req.query.sort ? (req.query.sort).toString() : 'nom_departement'
     }
 
     DepartmentModel.find({
@@ -59,6 +59,93 @@ export const findDepartments = (req, res) => {
             if (!err)
                 res.send(docs)
             else console.error(err)
+        })
+        .sort(queries.sort)
+        .limit(queries.limit)
+}
+
+/**
+ * Find departments by coordinates
+ * @param {number} latitude - Latitude coord
+ * @param {number} longitude - Longitude coord
+ * @param {number} max_distance - Max distance around location point in meters (?max_distance=), default to 0.
+ * @param {number} min_distance - Min distance arounded location point in meters (?min_distance=), default to 0.
+ * @param {number} limit - Limit the number of element returned (?limit=), default to 1.
+ * @param {string} sort - Sort the response by this field (?sort=)
+ * @param {string} return - Choose the element that should be returned. Default to `both` (?return=).
+ * - `geojson` will return department geojson only
+ * - `department` will return the department informations only
+ * - `both` will return an object containing geojson and department informations
+ */
+
+export const findDepartmentByCoordinates = (req, res) => {
+    const latitude = Number(req.params.latitude)
+    const longitude = Number(req.params.longitude)
+
+    const queries = {
+        max_distance: req.query.max_distance ? Number(req.query.max_distance) : 0,
+        min_distance: req.query.min_distance ? Number(req.query.min_distance) : 0,
+        limit: req.query.limit ? Number(req.query.limit) : 1,
+        sort: req.query.sort ? (req.query.sort).toString() : 'properties.nom',
+        return: req.query.return ? req.query.return : "both"
+    }
+
+    DepartmentGeoJSONModel.aggregate([
+        {
+            $geoNear: {
+                near: {
+                    type: "Point",
+                    coordinates: [longitude, latitude]
+                },
+                distanceField: "distance",
+                spherical: true,
+                maxDistance: queries.max_distance,
+                minDistance: queries.min_distance,
+                distanceMultiplier: 0.001
+            }
+        }
+    ],
+        (err, docs) => {
+            if (!err) {
+                switch (queries.return) {
+                    case 'geojson':
+                        res.send(docs[0])
+                        break;
+                    case 'department':
+                        DepartmentModel.findOne({
+                            "nom_departement": {
+                                $regex: encodeURI(docs[0].properties.nom),
+                                $options: "i"
+                            }
+                        },
+                            (err, result) => {
+                                if (!err)
+                                    res.send(result)
+                                else console.error(err)
+                            })
+                            .sort('nom_departement')
+                            .select()
+                        break;
+                    default:
+                        DepartmentModel.findOne({
+                            "nom_departement": {
+                                $regex: encodeURI(docs[0].properties.nom),
+                                $options: "i"
+                            }
+                        },
+                            (err, result) => {
+                                if (!err)
+                                    res.send(Object.assign(docs[0], { department: result }))
+                                else console.error(err)
+                            })
+                            .sort('nom_departement')
+                            .select()
+                        break;
+                }
+            }
+            else {
+                console.error(err)
+            }
         })
         .sort(queries.sort)
         .limit(queries.limit)
@@ -84,7 +171,7 @@ export const getAllDepartmentsGeolocations = (req, res) => {
 
 /**
  * Get departments geolocation by department name
- * @param {*} department Name of the department
+ * @param {string} department - Name of the department
  */
 
 export const getDepartmentGeolocation = (req, res) => {
@@ -101,49 +188,4 @@ export const getDepartmentGeolocation = (req, res) => {
         })
         .sort('properties.nom')
         .select()
-}
-
-/**
- * Find departments by coordinates
- * @param {*} latitude Latitude coord
- * @param {*} longitude Longitude coord
- * @param {*} max_distance Max distance around location point (?max_distance=)
- * @param {*} min_distance Min distance arounded location point (?min_distance=)
- * @param {*} limit Limit the number of element returned (?limit=)
- * @param {*} sort Sort the response by this field (?sort=)
- */
-
-export const findDepartmentByCoordinates = (req, res) => {
-    const latitude = Number(req.params.latitude)
-    const longitude = Number(req.params.longitude)
-
-    const queries = {
-        max_distance: req.query.max_distance ?  Number(req.query.max_distance) : 10000,
-        min_distance: req.query.min_distance ?  Number(req.query.min_distance) : 0,
-        limit: req.query.limit ?  Number(req.query.limit) : 100,
-        sort: req.query.sort ?  (req.query.sort).toString() : 'properties.nom'
-    }
-
-    DepartmentGeoJSONModel.aggregate([
-        {
-            $geoNear: {
-                near: {
-                    type: "Point",
-                    coordinates: [longitude, latitude]
-                },
-                distanceField: "distance",
-                spherical: true,
-                maxDistance: queries.max_distance,
-                minDistance: queries.min_distance,
-                distanceMultiplier : 0.001
-            }
-        }
-    ],
-        (err, docs) => {
-            if (!err)
-                res.send(docs)
-            else console.error(err)
-        })
-        .sort(queries.sort)
-        .limit(queries.limit)
 }

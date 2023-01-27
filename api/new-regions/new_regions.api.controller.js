@@ -1,12 +1,12 @@
-import RegionModel from "./regions.api.model.js"
-import RegionGeoJSONModel from "./regions.geojson.api.model.js"
+import NewRegionModel from "./new_regions.api.model.js"
+import NewRegionGeoJSONModel from "./new_regions.geojson.api.model.js"
 
 /**
- * Get all regions
+ * Get all new regions
  */
 
-export const getAllRegions = (req, res) => {
-    RegionModel.find({}, (err, docs) => {
+export const getAllNewRegions = (req, res) => {
+    NewRegionModel.find({}, (err, docs) => {
         if (!err)
             res.send(docs)
         else console.log('Error to get data => ' + err)
@@ -15,12 +15,12 @@ export const getAllRegions = (req, res) => {
 }
 
 /**
- * Get region by name
- * @param {string} region - Name of the region
+ * Get new region by name
+ * @param {string} region - Name of the new region
  */
 
-export const getRegion = (req, res) => {
-    RegionModel.findOne({
+export const getNewRegion = (req, res) => {
+    NewRegionModel.findOne({
         "nom_region": {
             $regex: encodeURI(req.params.region),
             $options: "i"
@@ -36,19 +36,19 @@ export const getRegion = (req, res) => {
 }
 
 /**
- * Find regions from query
- * @param {string} query - Query to find regions
+ * Find new regions from query
+ * @param {string} query - Query to find new regions
  * @param {number} limit - Limit the number of element returned (?limit=)
  * @param {string} sort - Sort the response by this field (?sort=)
  */
 
-export const findRegions = (req, res) => {
+export const findNewRegions = (req, res) => {
     const queries = {
         limit: req.query.limit ? Number(req.query.limit) : 15,
         sort: req.query.sort ? (req.query.sort).toString() : 'nom_region'
     }
 
-    RegionModel.find({
+    NewRegionModel.find({
         "nom_region": {
             $regex: encodeURI(req.params.query),
             $options: "i"
@@ -64,7 +64,7 @@ export const findRegions = (req, res) => {
 }
 
 /**
- * Find regions by coordinates
+ * Find new regions by coordinates
  * @param {number} latitude - Latitude coord
  * @param {number} longitude - Longitude coord
  * @param {number} max_distance - Max distance around location point in meters (?max_distance=), default to 0.
@@ -77,7 +77,7 @@ export const findRegions = (req, res) => {
  * - `both` will return an object containing geojson and region informations
  */
 
-export const findRegionByCoordinates = (req, res) => {
+export const findNewRegionByCoordinates = (req, res) => {
     const latitude = Number(req.params.latitude)
     const longitude = Number(req.params.longitude)
 
@@ -89,7 +89,7 @@ export const findRegionByCoordinates = (req, res) => {
         return: req.query.return ? req.query.return : "both"
     }
 
-    RegionGeoJSONModel.aggregate([
+    NewRegionGeoJSONModel.aggregate([
         {
             $geoNear: {
                 near: {
@@ -111,7 +111,7 @@ export const findRegionByCoordinates = (req, res) => {
                         res.send(docs[0])
                         break;
                     case 'region':
-                        RegionModel.findOne({
+                        NewRegionModel.findOne({
                             "nom_region": {
                                 $regex: docs[0].properties.nom,
                                 $options: "i"
@@ -126,7 +126,7 @@ export const findRegionByCoordinates = (req, res) => {
                             .select()
                         break;
                     default:
-                        RegionModel.findOne({
+                        NewRegionModel.findOne({
                             "nom_region": {
                                 $regex: docs[0].properties.nom,
                                 $options: "i"
@@ -158,8 +158,8 @@ export const findRegionByCoordinates = (req, res) => {
  * Get all regions geolocations
  */
 
-export const getAllRegionsGeolocations = (req, res) => {
-    RegionGeoJSONModel.find({}, (err, docs) => {
+export const getAllNewRegionsGeolocations = (req, res) => {
+    NewRegionGeoJSONModel.find({}, (err, docs) => {
         if (!err) {
             res.send(docs)
         } else {
@@ -173,8 +173,8 @@ export const getAllRegionsGeolocations = (req, res) => {
  * @param {string} region - Name of the region
  */
 
-export const getRegionGeolocation = (req, res) => {
-    RegionGeoJSONModel.findOne({
+export const getNewRegionGeolocation = (req, res) => {
+    NewRegionGeoJSONModel.findOne({
         'properties.nom': {
             $regex: encodeURI(req.params.region),
             $options: "i"
