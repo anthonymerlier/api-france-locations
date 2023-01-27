@@ -15,7 +15,7 @@ export const getAllLocations = (req, res) => {
 
 /**
  * Get location by name
- * @param {*} location Name of the location
+ * @param {*} location - Name of the location
  */
 
 export const getLocation = (req, res) => {
@@ -36,9 +36,9 @@ export const getLocation = (req, res) => {
 
 /**
  * Find location from query
- * @param {*} query Query to find locations
- * @param {*} limit Limit the number of element returned (?limit=)
- * @param {*} sort Sort the response by this field (?sort=)
+ * @param {*} query - Query to find locations
+ * @param {*} limit - Limit the number of element returned (?limit=)
+ * @param {*} sort - Sort the response by this field (?sort=)
  */
 
 export const findLocation = (req, res) => {
@@ -77,15 +77,14 @@ export const findLocation = (req, res) => {
  */
 
 export const findLocationByCoordinates = (req, res) => {
-    const latitude = Number(req.params.latitude)
-    const longitude = Number(req.params.longitude)
-
     const queries = {
+        lat: Number(req.query.lat),
+        lon: Number(req.query.lon),
         max_distance: req.query.max_distance ? Number(req.query.max_distance) : 0,
         min_distance: req.query.min_distance ? Number(req.query.min_distance) : 0,
         limit: req.query.limit ? Number(req.query.limit) : 100,
         sort: req.query.sort ? (req.query.sort).toString() : 'fields.com_nom',
-        return: req.query.return ? req.query.return : "both"
+        return: req.query.return ? (req.query.return).toString() : "both"
     }
 
     LocationGeoJSONModel.aggregate([
@@ -93,7 +92,7 @@ export const findLocationByCoordinates = (req, res) => {
             $geoNear: {
                 near: {
                     type: "Point",
-                    coordinates: [longitude, latitude]
+                    coordinates: [queries.lon, queries.lat]
                 },
                 distanceField: "distance",
                 spherical: true,
@@ -169,7 +168,7 @@ export const getAllGeolocations = (req, res) => {
 
 /**
  * Get location geolocation by location name
- * @param {*} location Name of the location
+ * @param {*} location - Name of the location
  */
 
 export const getGeolocation = (req, res) => {

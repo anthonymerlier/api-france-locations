@@ -78,15 +78,14 @@ export const findRegions = (req, res) => {
  */
 
 export const findRegionByCoordinates = (req, res) => {
-    const latitude = Number(req.params.latitude)
-    const longitude = Number(req.params.longitude)
-
     const queries = {
+        lat: Number(req.query.lat),
+        lon: Number(req.query.lon),
         max_distance: req.query.max_distance ? Number(req.query.max_distance) : 0,
         min_distance: req.query.min_distance ? Number(req.query.min_distance) : 0,
         limit: req.query.limit ? Number(req.query.limit) : 1,
         sort: req.query.sort ? (req.query.sort).toString() : 'properties.nom',
-        return: req.query.return ? req.query.return : "both"
+        return: req.query.return ? (req.query.return).toString() : "both"
     }
 
     RegionGeoJSONModel.aggregate([
@@ -94,7 +93,7 @@ export const findRegionByCoordinates = (req, res) => {
             $geoNear: {
                 near: {
                     type: "Point",
-                    coordinates: [longitude, latitude]
+                    coordinates: [queries.lon, queries.lat]
                 },
                 distanceField: "distance",
                 spherical: true,
