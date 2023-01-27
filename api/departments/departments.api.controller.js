@@ -17,6 +17,7 @@ export const getAllDepartments = (req, res) => {
 
 /**
  * Get department by name
+ * @param {*} department Name of the department
  */
 
 export const getDepartment = (req, res) => {
@@ -37,9 +38,17 @@ export const getDepartment = (req, res) => {
 
 /**
  * Find departments from query
+ * @param {*} query Query to find departments
+ * @param {*} limit Limit the number of element returned (?limit=)
+ * @param {*} sort Sort the response by this field (?sort=)
  */
 
 export const findDepartments = (req, res) => {
+    const queries = {
+        limit: req.query.limit ?  Number(req.query.limit) : 15,
+        sort: req.query.sort ?  (req.query.sort).toString() : 'nom_departement'
+    }
+
     DepartmentModel.find({
         "nom_departement": {
             $regex: encodeURI(req.params.query),
@@ -51,8 +60,8 @@ export const findDepartments = (req, res) => {
                 res.send(docs)
             else console.error(err)
         })
-        .sort('nom_departement')
-        .limit(15)
+        .sort(queries.sort)
+        .limit(queries.limit)
 }
 
 /****************************************************************************/
@@ -75,6 +84,7 @@ export const getAllDepartmentsGeolocations = (req, res) => {
 
 /**
  * Get departments geolocation by department name
+ * @param {*} department Name of the department
  */
 
 export const getDepartmentGeolocation = (req, res) => {
@@ -91,4 +101,49 @@ export const getDepartmentGeolocation = (req, res) => {
         })
         .sort('properties.nom')
         .select()
+}
+
+/**
+ * Find departments by coordinates
+ * @param {*} latitude Latitude coord
+ * @param {*} longitude Longitude coord
+ * @param {*} max_distance Max distance around location point (?max_distance=)
+ * @param {*} min_distance Min distance arounded location point (?min_distance=)
+ * @param {*} limit Limit the number of element returned (?limit=)
+ * @param {*} sort Sort the response by this field (?sort=)
+ */
+
+export const findDepartmentByCoordinates = (req, res) => {
+    const latitude = Number(req.params.latitude)
+    const longitude = Number(req.params.longitude)
+
+    const queries = {
+        max_distance: req.query.max_distance ?  Number(req.query.max_distance) : 10000,
+        min_distance: req.query.min_distance ?  Number(req.query.min_distance) : 0,
+        limit: req.query.limit ?  Number(req.query.limit) : 100,
+        sort: req.query.sort ?  (req.query.sort).toString() : 'properties.nom'
+    }
+
+    DepartmentGeoJSONModel.aggregate([
+        {
+            $geoNear: {
+                near: {
+                    type: "Point",
+                    coordinates: [longitude, latitude]
+                },
+                distanceField: "distance",
+                spherical: true,
+                maxDistance: queries.max_distance,
+                minDistance: queries.min_distance,
+                distanceMultiplier : 0.001
+            }
+        }
+    ],
+        (err, docs) => {
+            if (!err)
+                res.send(docs)
+            else console.error(err)
+        })
+        .sort(queries.sort)
+        .limit(queries.limit)
 }

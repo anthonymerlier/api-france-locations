@@ -15,6 +15,7 @@ export const getAllLocations = (req, res) => {
 
 /**
  * Get location by name
+ * @param {*} location Name of the location
  */
 
 export const getLocation = (req, res) => {
@@ -35,9 +36,17 @@ export const getLocation = (req, res) => {
 
 /**
  * Find location from query
+ * @param {*} query Query to find locations
+ * @param {*} limit Limit the number of element returned (?limit=)
+ * @param {*} sort Sort the response by this field (?sort=)
  */
 
 export const findLocation = (req, res) => {
+    const queries = {
+        limit: req.query.limit ?  Number(req.query.limit) : 15,
+        sort: req.query.sort ?  (req.query.sort).toString() : 'fields.com_nom'
+    }
+
     LocationModel.find({
         "fields.com_nom": {
             $regex: encodeURI(req.params.query),
@@ -49,20 +58,30 @@ export const findLocation = (req, res) => {
                 res.send(docs)
             else console.error(err)
         })
-        .sort('fields.com_nom')
-        .limit(15)
+        .sort(queries.sort)
+        .limit(queries.limit)
 }
 
 /**
- * Find location from query
+ * Find location from coordinates
+ * @param {*} latitude Latitude coord
+ * @param {*} longitude Longitude coord
+ * @param {*} max_distance Max distance around location point (?max_distance=)
+ * @param {*} min_distance Min distance arounded location point (?min_distance=)
+ * @param {*} limit Limit the number of element returned (?limit=)
+ * @param {*} sort Sort the response by this field (?sort=)
  */
 
 export const findLocationByCoordinates = (req, res) => {
     const latitude = Number(req.params.latitude)
     const longitude = Number(req.params.longitude)
 
-    // const unitValue = req.params?.unit === "km" ? 1000 : 1609.3;
-    // const distance = req.params?.distance ? req.params?.distance : 100;
+    const queries = {
+        max_distance: req.query.max_distance ?  Number(req.query.max_distance) : 10000,
+        min_distance: req.query.min_distance ?  Number(req.query.min_distance) : 0,
+        limit: req.query.limit ?  Number(req.query.limit) : 100,
+        sort: req.query.sort ?  (req.query.sort).toString() : 'fields.com_nom'
+    }
 
     LocationModel.aggregate([
         {
@@ -73,7 +92,9 @@ export const findLocationByCoordinates = (req, res) => {
                 },
                 distanceField: "distance",
                 spherical: true,
-                maxDistance: 50000
+                maxDistance: queries.max_distance,
+                minDistance: queries.min_distance,
+                distanceMultiplier : 0.001
             }
         }
     ],
@@ -82,6 +103,8 @@ export const findLocationByCoordinates = (req, res) => {
                 res.send(docs)
             else console.error(err)
         })
+        .sort(queries.sort)
+        .limit(queries.limit)
 }
 
 /****************************************************************************/
@@ -104,6 +127,7 @@ export const getAllGeolocations = (req, res) => {
 
 /**
  * Get location geolocation by location name
+ * @param {*} location Name of the location
  */
 
 export const getGeolocation = (req, res) => {
