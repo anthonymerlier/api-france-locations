@@ -1,4 +1,4 @@
-import LocationApiModel from "./location.api.model.js"
+import LocationModel from "./location.api.model.js"
 import LocationGeoJSONModel from './location.geojson.api.model.js'
 
 /**
@@ -6,7 +6,7 @@ import LocationGeoJSONModel from './location.geojson.api.model.js'
  */
 
 export const getAllLocations = (req, res) => {
-    LocationApiModel.find({}, (err, docs) => {
+    LocationModel.find({}, (err, docs) => {
         if (!err)
             res.send(docs)
         else console.log('Error to get data => ' + err)
@@ -18,7 +18,7 @@ export const getAllLocations = (req, res) => {
  */
 
 export const getLocation = (req, res) => {
-    LocationApiModel.findOne({
+    LocationModel.findOne({
         "fields.com_nom": {
             $regex: encodeURI(req.params.location),
             $options: "i"
@@ -38,7 +38,7 @@ export const getLocation = (req, res) => {
  */
 
 export const findLocation = (req, res) => {
-    LocationApiModel.find({
+    LocationModel.find({
         "fields.com_nom": {
             $regex: encodeURI(req.params.query),
             $options: "i"
@@ -64,19 +64,24 @@ export const findLocationByCoordinates = (req, res) => {
     // const unitValue = req.params?.unit === "km" ? 1000 : 1609.3;
     // const distance = req.params?.distance ? req.params?.distance : 100;
 
-    LocationApiModel.aggregate([
+    LocationModel.aggregate([
         {
-            "$geoNear": {
-                "near": {
-                    "type": "Point",
-                    "coordinates": [longitude, latitude]
+            $geoNear: {
+                near: {
+                    type: "Point",
+                    coordinates: [longitude, latitude]
                 },
-                "distanceField": "distance",
-                "spherical": true,
-                "maxDistance": 50000
+                distanceField: "distance",
+                spherical: true,
+                maxDistance: 50000
             }
         }
-    ])
+    ],
+        (err, docs) => {
+            if (!err)
+                res.send(docs)
+            else console.error(err)
+        })
 }
 
 /****************************************************************************/

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const LocationApiModel = new mongoose.Schema(
+const LocationModel = new mongoose.Schema(
     {
         datasetid: {
             type: String
@@ -136,4 +136,4 @@ const LocationApiModel = new mongoose.Schema(
     }
 );
 
-export default mongoose.model("france_cities", LocationApiModel)
+export default mongoose.model("france_cities", LocationModel)
