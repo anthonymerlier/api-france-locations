@@ -8,7 +8,7 @@ newRegionsRoutes.get('/', getAllNewRegions)
 newRegionsRoutes.get('/:region', getNewRegion)
 newRegionsRoutes.get('/find/:query', findNewRegions)
 
-newRegionsRoutes.get('/geolocation/', getAllNewRegionsGeolocations)
+newRegionsRoutes.get('/geolocation/all', getAllNewRegionsGeolocations)
 newRegionsRoutes.get('/geolocation/:region', getNewRegionGeolocation)
 
 newRegionsRoutes.get('/geolocation/:latitude/:longitude/', findNewRegionByCoordinates)

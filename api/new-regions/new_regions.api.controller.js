@@ -22,7 +22,7 @@ export const getAllNewRegions = (req, res) => {
 export const getNewRegion = (req, res) => {
     NewRegionModel.findOne({
         "nom_region": {
-            $regex: encodeURI(req.params.region),
+            $regex: `\\b(^|\\s|[^\\W])${encodeURI(req.params.region)}(\\s|[^\\W]|$)\\b`,
             $options: "i"
         }
     },
@@ -176,7 +176,7 @@ export const getAllNewRegionsGeolocations = (req, res) => {
 export const getNewRegionGeolocation = (req, res) => {
     NewRegionGeoJSONModel.findOne({
         'properties.nom': {
-            $regex: encodeURI(req.params.region),
+            $regex: `\\b(^|\\s|[^\\W])${encodeURI(req.params.region)}(\\s|[^\\W]|$)\\b`,
             $options: "i"
         }
     },

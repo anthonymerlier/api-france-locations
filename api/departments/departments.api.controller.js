@@ -23,7 +23,7 @@ export const getAllDepartments = (req, res) => {
 export const getDepartment = (req, res) => {
     DepartmentModel.findOne({
         "nom_departement": {
-            $regex: encodeURI(req.params.department),
+            $regex: `\\b(^|\\s|[^\\W])${encodeURI(req.params.department)}(\\s|[^\\W]|$)\\b`,
             $options: "i"
         }
     },
@@ -177,7 +177,7 @@ export const getAllDepartmentsGeolocations = (req, res) => {
 export const getDepartmentGeolocation = (req, res) => {
     DepartmentGeoJSONModel.findOne({
         'properties.nom': {
-            $regex: encodeURI(req.params.department),
+            $regex: `\\b(^|\\s|[^\\W])${encodeURI(req.params.department)}(\\s|[^\\W]|$)\\b`,
             $options: "i"
         }
     },

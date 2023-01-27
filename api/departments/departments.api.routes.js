@@ -4,13 +4,13 @@ import { getAllDepartments, getDepartment, findDepartments, getAllDepartmentsGeo
 
 // Root => api/departments
 
-departmentsRoutes.get('/geolocation/', getAllDepartmentsGeolocations)
-departmentsRoutes.get('/geolocation/:department', getDepartmentGeolocation)
-
-departmentsRoutes.get('/geolocation/:latitude/:longitude/', findDepartmentByCoordinates)
-
 departmentsRoutes.get('/', getAllDepartments)
 departmentsRoutes.get('/:department', getDepartment)
 departmentsRoutes.get('/find/:query', findDepartments)
+
+departmentsRoutes.get('/geolocation/all', getAllDepartmentsGeolocations)
+departmentsRoutes.get('/geolocation/:department', getDepartmentGeolocation)
+
+departmentsRoutes.get('/geolocation/:latitude/:longitude/', findDepartmentByCoordinates)
 
 export default departmentsRoutes;

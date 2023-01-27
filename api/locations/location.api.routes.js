@@ -4,13 +4,13 @@ import { getAllLocations, getLocation, findLocation, findLocationByCoordinates, 
 
 // Root => api/locations
 
-locationsRoutes.get('/geolocation/', getAllGeolocations)
-locationsRoutes.get('/geolocation/:location', getGeolocation)
-
-locationsRoutes.get('/geolocation/:latitude/:longitude/', findLocationByCoordinates)
-
 locationsRoutes.get('/', getAllLocations)
 locationsRoutes.get('/:location', getLocation)
 locationsRoutes.get('/find/:query', findLocation)
+
+locationsRoutes.get('/geolocation/all', getAllGeolocations)
+locationsRoutes.get('/geolocation/:location', getGeolocation)
+
+locationsRoutes.get('/geolocation/:latitude/:longitude/', findLocationByCoordinates)
 
 export default locationsRoutes;
