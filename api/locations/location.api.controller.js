@@ -1,0 +1,79 @@
+import LocationApiModel from "./location.api.model.js"
+
+/**
+ * Get all locations
+ */
+
+export const getAllLocations = (req, res) => {
+    LocationApiModel.find((err, docs) => {
+        if (!err)
+            res.send(docs)
+        else console.log('Error to get data => ' + err)
+    })
+}
+
+/**
+ * Get location by name
+ */
+
+export const getLocation = (req, res) => {
+    LocationApiModel.findOne({
+        "fields.com_nom": {
+            $regex: encodeURI(req.params.location),
+            $options: "i"
+        }
+    },
+        (err, docs) => {
+            if (!err)
+                res.send(docs)
+            else console.error(err)
+        })
+        .sort('fields.com_nom')
+        .select()
+}
+
+/**
+ * Find location from query
+ */
+
+export const findLocation = (req, res) => {
+    LocationApiModel.find({
+        "fields.com_nom": {
+            $regex: encodeURI(req.params.query),
+            $options: "i"
+        }
+    },
+        (err, docs) => {
+            if (!err)
+                res.send(docs)
+            else console.error(err)
+        })
+        .sort('fields.com_nom')
+        .limit(15)
+}
+
+/**
+ * Find location from query
+ */
+
+export const findLocationByCoordinates = (req, res) => {
+    const latitude = Number(req.params.latitude)
+    const longitude = Number(req.params.longitude)
+
+    // const unitValue = req.params?.unit === "km" ? 1000 : 1609.3;
+    // const distance = req.params?.distance ? req.params?.distance : 100;
+
+    LocationApiModel.aggregate([
+        {
+            "$geoNear": {
+                "near": {
+                    "type": "Point",
+                    "coordinates": [longitude, latitude]
+                },
+                "distanceField": "distance",
+                "spherical": true,
+                "maxDistance": 50000
+            }
+        }
+    ])
+}
