@@ -5,7 +5,6 @@ import dotenv from 'dotenv'
 dotenv.config({ path: './config/config.env' })
 import './config/db.js'
 import locationsRoutes from './api/locations/location.api.routes.js'
-import geolocationsRoutes from './api/geolocations/geolocations.api.routes.js'
 import departmentsRoutes from './api/departments/departments.api.routes.js'
 import regionsRoutes from './api/regions/regions.api.routes.js'
 
@@ -29,7 +28,6 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json({ limit: '50mb' }))
 
 app.use('/api/locations', locationsRoutes)
-app.use('/api/geolocations', geolocationsRoutes)
 app.use('/api/departments', departmentsRoutes)
 app.use('/api/regions', regionsRoutes)
 

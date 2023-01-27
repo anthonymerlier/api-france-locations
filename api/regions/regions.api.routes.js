@@ -1,7 +1,11 @@
 import express from 'express'
 const regionsRoutes = express.Router()
-import { getAllRegions, getRegion, findRegions } from './regions.api.controller.js';
-import { getAllNewRegions, getNewRegion, findNewRegions } from './new_regions.api.controller.js';
+import { getAllRegions, getRegion, findRegions, getAllNewRegions, getNewRegion, findNewRegions, getAllRegionsGeolocations, getRegionGeolocation } from './regions.api.controller.js';
+
+// Root => api/regions
+
+regionsRoutes.get('/geolocation/', getAllRegionsGeolocations)
+regionsRoutes.get('/geolocation/:region', getRegionGeolocation)
 
 regionsRoutes.get('/new', getAllNewRegions)
 regionsRoutes.get('/new/:region', getNewRegion)

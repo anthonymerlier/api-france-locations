@@ -1,11 +1,14 @@
 import mongoose from 'mongoose'
 
-const GeolocationApiModel = new mongoose.Schema(
+const LocationGeoJSONModel = new mongoose.Schema(
     {
         type: {
             type: String
         },
         geometry: {
+            type: {
+                type: String
+            },
             coordinates: {
                 type: [],
             }
@@ -18,7 +21,11 @@ const GeolocationApiModel = new mongoose.Schema(
                 type: String
             }
         }
+    },
+    {
+        collection: 'france_cities_geojson',
+        timestamps: true
     }
 )
 
-export default mongoose.model("france_cities_geojson", GeolocationApiModel)
+export default mongoose.model("france_cities_geojson", LocationGeoJSONModel)

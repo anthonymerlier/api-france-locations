@@ -129,6 +129,10 @@ const LocationApiModel = new mongoose.Schema(
                 type: String
             }
         }
+    },
+    {
+        collection: 'france_cities',
+        timestamps: true
     }
 );
 

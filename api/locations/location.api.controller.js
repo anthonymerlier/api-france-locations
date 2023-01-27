@@ -1,11 +1,12 @@
 import LocationApiModel from "./location.api.model.js"
+import LocationGeoJSONModel from './location.geojson.api.model.js'
 
 /**
  * Get all locations
  */
 
 export const getAllLocations = (req, res) => {
-    LocationApiModel.find((err, docs) => {
+    LocationApiModel.find({}, (err, docs) => {
         if (!err)
             res.send(docs)
         else console.log('Error to get data => ' + err)
@@ -76,4 +77,42 @@ export const findLocationByCoordinates = (req, res) => {
             }
         }
     ])
+}
+
+/****************************************************************************/
+/****************************************************************************/
+/****************************************************************************/
+
+/**
+ * Get all locations geolocations
+ */
+
+export const getAllGeolocations = (req, res) => {
+    LocationGeoJSONModel.find({}, (err, docs) => {
+        if (!err) {
+            res.send(docs)
+        } else {
+            console.log('Error to get data => ' + err)
+        }
+    })
+}
+
+/**
+ * Get location geolocation by location name
+ */
+
+export const getGeolocation = (req, res) => {
+    LocationGeoJSONModel.findOne({
+        'properties.nom': {
+            $regex: encodeURI(req.params.location),
+            $options: "i"
+        }
+    },
+        (err, docs) => {
+            if (!err)
+                res.send(docs)
+            else console.error(err)
+        })
+        .sort('properties.nom')
+        .select()
 }

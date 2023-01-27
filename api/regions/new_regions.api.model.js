@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const NewRegionApiModel = new mongoose.Schema(
+const NewRegionModel = new mongoose.Schema(
     {
         code_region: {
             type: Number
@@ -8,7 +8,11 @@ const NewRegionApiModel = new mongoose.Schema(
         nom_region: {
             type: String
         }
+    },
+    {
+        collection: 'france_new_regions',
+        timestamps: true
     }
 );
 
-export default mongoose.model("france_new_regions", NewRegionApiModel)
+export default mongoose.model("france_new_regions", NewRegionModel)

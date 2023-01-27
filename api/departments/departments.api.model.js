@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const DepartmentApiModel = new mongoose.Schema(
+const DepartmentModel = new mongoose.Schema(
     {
         code_departement: {
             type: Number
@@ -20,7 +20,11 @@ const DepartmentApiModel = new mongoose.Schema(
         nom_ancienne_region: {
             type: String
         }
+    },
+    {
+        collection: 'france_departments',
+        timestamps: true
     }
 );
 
-export default mongoose.model("france_departments", DepartmentApiModel)
+export default mongoose.model("france_departments", DepartmentModel)

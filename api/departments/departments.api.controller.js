@@ -1,15 +1,17 @@
-import DepartmentApiModel from "./departments.api.model.js"
+import DepartmentModel from "./departments.api.model.js"
+import DepartmentGeoJSONModel from "./departments.geojson.api.model.js"
 
 /**
  * Get all departments
  */
 
 export const getAllDepartments = (req, res) => {
-    DepartmentApiModel.find((err, docs) => {
-        if (!err)
-            res.send(docs)
-        else console.log('Error to get data => ' + err)
-    })
+    DepartmentModel.find({},
+        (err, docs) => {
+            if (!err)
+                res.send(docs)
+            else console.log('Error to get data => ' + err)
+        })
         .sort('nom_departement')
 }
 
@@ -18,7 +20,7 @@ export const getAllDepartments = (req, res) => {
  */
 
 export const getDepartment = (req, res) => {
-    DepartmentApiModel.findOne({
+    DepartmentModel.findOne({
         "nom_departement": {
             $regex: encodeURI(req.params.department),
             $options: "i"
@@ -38,7 +40,7 @@ export const getDepartment = (req, res) => {
  */
 
 export const findDepartments = (req, res) => {
-    DepartmentApiModel.find({
+    DepartmentModel.find({
         "nom_departement": {
             $regex: encodeURI(req.params.query),
             $options: "i"
@@ -51,4 +53,42 @@ export const findDepartments = (req, res) => {
         })
         .sort('nom_departement')
         .limit(15)
+}
+
+/****************************************************************************/
+/****************************************************************************/
+/****************************************************************************/
+
+/**
+ * Get all departments geolocations
+ */
+
+export const getAllDepartmentsGeolocations = (req, res) => {
+    DepartmentGeoJSONModel.find({}, (err, docs) => {
+        if (!err) {
+            res.send(docs)
+        } else {
+            console.log('Error to get data => ' + err)
+        }
+    })
+}
+
+/**
+ * Get departments geolocation by department name
+ */
+
+export const getDepartmentGeolocation = (req, res) => {
+    DepartmentGeoJSONModel.findOne({
+        'properties.nom': {
+            $regex: encodeURI(req.params.department),
+            $options: "i"
+        }
+    },
+        (err, docs) => {
+            if (!err)
+                res.send(docs)
+            else console.error(err)
+        })
+        .sort('properties.nom')
+        .select()
 }
