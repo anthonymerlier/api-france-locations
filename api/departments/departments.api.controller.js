@@ -99,7 +99,6 @@ export const findDepartmentByCoordinates = (req, res) => {
                 distanceField: "distance",
                 spherical: true,
                 maxDistance: queries.max_distance,
-                minDistance: queries.min_distance,
                 distanceMultiplier: 0.001
             }
         }
@@ -187,4 +186,32 @@ export const getDepartmentGeolocation = (req, res) => {
         })
         .sort('properties.nom')
         .select()
+}
+
+/**
+ * Find departments from query
+ * @param {*} query - Query to find departments
+ * @param {*} limit - Limit the number of element returned (?limit=)
+ * @param {*} sort - Sort the response by this field (?sort=)
+ */
+
+export const findDepartmentsGeolocations = (req, res) => {
+    const queries = {
+        limit: req.query.limit ? Number(req.query.limit) : 10,
+        sort: req.query.sort ? (req.query.sort).toString() : 'properties.nom'
+    }
+
+    DepartmentGeoJSONModel.find({
+        "properties.nom": {
+            $regex: encodeURI(req.params.query),
+            $options: "i"
+        }
+    },
+        (err, docs) => {
+            if (!err)
+                return res.send(docs)
+            else console.error(err)
+        })
+        .sort(queries.sort)
+        .limit(queries.limit)
 }
