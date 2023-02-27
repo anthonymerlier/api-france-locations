@@ -31,7 +31,7 @@ app.use(bodyParser.json({ limit: '50mb' }))
 app.use('/search/locations', locationsRoutes)
 app.use('/search/departments', departmentsRoutes)
 app.use('/search/regions', regionsRoutes)
-app.use('/search/regions/new', newRegionsRoutes)
+app.use('/search/new-regions', newRegionsRoutes)
 
 if (process.env.NODE_ENV !== 'production') {
     process.once('uncaughtException', err => {
