@@ -82,7 +82,7 @@ export const findLocationByCoordinates = (req, res) => {
         lon: Number(req.query.lon),
         max_distance: req.query.max_distance ? Number(req.query.max_distance) : 0,
         min_distance: req.query.min_distance ? Number(req.query.min_distance) : 0,
-        limit: req.query.limit ? Number(req.query.limit) : 100,
+        limit: req.query.limit ? Number(req.query.limit) : 15,
         sort: req.query.sort ? (req.query.sort).toString() : 'fields.com_nom',
         return: req.query.return ? (req.query.return).toString() : "both"
     }
@@ -103,39 +103,55 @@ export const findLocationByCoordinates = (req, res) => {
     ],
         (err, docs) => {
             if (!err) {
+                let array = []
+                let results = []
                 switch (queries.return) {
                     case 'geojson':
-                        res.send(docs[0])
+                        res.send(docs)
                         break;
                     case 'location':
-                        LocationModel.findOne({
-                            "fields.com_nom": {
-                                $regex: docs[0].properties.nom,
-                                $options: "i"
-                            }
-                        },
-                            (err, result) => {
-                                if (!err)
-                                    res.send(result)
-                                else console.error(err)
-                            })
-                            .sort('fields.com_nom')
-                            .select()
+                        array = docs.map(value => { return new RegExp(value.properties.nom) });
+                        array.forEach((word, i) => {
+                            LocationModel.findOne({
+                                "fields.com_nom": {
+                                    $regex: word,
+                                    $options: "i"
+                                }
+                            },
+                                (err, result) => {
+                                    if (!err) {
+                                        results = [...results, result]
+                                        if (i === docs.length - 1) {
+                                            res.send(results)
+                                        }
+                                    }
+                                    else console.error(err)
+                                })
+                                .sort('fields.com_nom')
+                                .select()
+                        })
                         break;
                     default:
-                        LocationModel.findOne({
-                            "fields.com_nom": {
-                                $regex: docs[0].properties.nom,
-                                $options: "i"
-                            }
-                        },
-                            (err, result) => {
-                                if (!err)
-                                    res.send(Object.assign(docs[0], { region: result }))
-                                else console.error(err)
-                            })
-                            .sort('fields.com_nom')
-                            .select()
+                        array = docs.map(value => { return new RegExp(value.properties.nom) });
+                        array.forEach((word, i) => {
+                            LocationModel.findOne({
+                                "fields.com_nom": {
+                                    $regex: word,
+                                    $options: "m"
+                                }
+                            },
+                                (err, result) => {
+                                    if (!err) {
+                                        results = [...results, Object.assign(docs[i], { location: result })]
+                                        if (i === docs.length - 1) {
+                                            res.send(results)
+                                        }
+                                    }
+                                    else console.error(err)
+                                })
+                                .sort('fields.com_nom')
+                                .select()
+                        })
                         break;
                 }
             }

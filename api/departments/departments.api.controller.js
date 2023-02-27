@@ -84,7 +84,7 @@ export const findDepartmentByCoordinates = (req, res) => {
         lon: Number(req.query.lon),
         max_distance: req.query.max_distance ? Number(req.query.max_distance) : 0,
         min_distance: req.query.min_distance ? Number(req.query.min_distance) : 0,
-        limit: req.query.limit ? Number(req.query.limit) : 1,
+        limit: req.query.limit ? Number(req.query.limit) : 15,
         sort: req.query.sort ? (req.query.sort).toString() : 'properties.nom',
         return: req.query.return ? (req.query.return).toString() : "both"
     }
@@ -105,39 +105,55 @@ export const findDepartmentByCoordinates = (req, res) => {
     ],
         (err, docs) => {
             if (!err) {
+                let array = []
+                let results = []
                 switch (queries.return) {
                     case 'geojson':
-                        res.send(docs[0])
+                        res.send(docs)
                         break;
                     case 'department':
-                        DepartmentModel.findOne({
-                            "nom_departement": {
-                                $regex: encodeURI(docs[0].properties.nom),
-                                $options: "i"
-                            }
-                        },
-                            (err, result) => {
-                                if (!err)
-                                    res.send(result)
-                                else console.error(err)
-                            })
-                            .sort('nom_departement')
-                            .select()
+                        array = docs.map(value => { return new RegExp(value.properties.nom) });
+                        array.forEach((word, i) => {
+                            DepartmentModel.findOne({
+                                "nom_departement": {
+                                    $regex: word,
+                                    $options: "i"
+                                }
+                            },
+                                (err, result) => {
+                                    if (!err) {
+                                        results = [...results, result]
+                                        if (i === docs.length - 1) {
+                                            res.send(results)
+                                        }
+                                    }
+                                    else console.error(err)
+                                })
+                                .sort('nom_departement')
+                                .select()
+                        })
                         break;
                     default:
-                        DepartmentModel.findOne({
-                            "nom_departement": {
-                                $regex: encodeURI(docs[0].properties.nom),
-                                $options: "i"
-                            }
-                        },
-                            (err, result) => {
-                                if (!err)
-                                    res.send(Object.assign(docs[0], { department: result }))
-                                else console.error(err)
-                            })
-                            .sort('nom_departement')
-                            .select()
+                        array = docs.map(value => { return new RegExp(value.properties.nom) });
+                        array.forEach((word, i) => {
+                            DepartmentModel.findOne({
+                                "nom_departement": {
+                                    $regex: word,
+                                    $options: "i"
+                                }
+                            },
+                                (err, result) => {
+                                    if (!err) {
+                                        results = [...results, Object.assign(docs[i], { department: result })]
+                                        if (i === docs.length - 1) {
+                                            res.send(results)
+                                        }
+                                    }
+                                    else console.error(err)
+                                })
+                                .sort('nom_departement')
+                                .select()
+                        })
                         break;
                 }
             }
