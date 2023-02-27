@@ -10,7 +10,7 @@ import {
     findDepartmentsGeolocations
 } from './departments.api.controller.js';
 
-// Root => api/departments
+// Root => search/departments
 
 departmentsRoutes.get('/geolocation', findDepartmentByCoordinates)
 

@@ -21,7 +21,7 @@ export const getAllLocations = (req, res) => {
 export const getLocation = (req, res) => {
     LocationModel.findOne({
         "fields.com_nom": {
-            $regex: `\\b(^|\\s|[^\\W])${encodeURI(req.params.location)}(\\s|[^\\W]|$)\\b`,
+            $regex: encodeURI(req.params.location),
             $options: "i"
         }
     },
@@ -189,7 +189,7 @@ export const getAllGeolocations = (req, res) => {
 export const getGeolocation = (req, res) => {
     LocationGeoJSONModel.findOne({
         'properties.nom': {
-            $regex: `\\b(^|\\s|[^\\W])${encodeURI(req.params.location)}(\\s|[^\\W]|$)\\b`,
+            $regex: encodeURI(req.params.location),
             $options: "i"
         }
     },

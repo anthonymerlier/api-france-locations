@@ -10,7 +10,7 @@ import {
     findGeolocations
 } from './location.api.controller.js';
 
-// Root => api/locations
+// Root => search/locations
 
 locationsRoutes.get('/geolocation', findLocationByCoordinates)
 

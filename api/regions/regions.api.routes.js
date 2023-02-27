@@ -10,7 +10,7 @@ import {
     findRegionsGeolocations
 } from './regions.api.controller.js';
 
-// Root => api/regions
+// Root => search/regions
 
 regionsRoutes.get('/geolocation', findRegionByCoordinates)
 
