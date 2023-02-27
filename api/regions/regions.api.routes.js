@@ -6,7 +6,8 @@ import {
     findRegions,
     getAllRegionsGeolocations,
     getRegionGeolocation,
-    findRegionByCoordinates
+    findRegionByCoordinates,
+    findRegionsGeolocations
 } from './regions.api.controller.js';
 
 // Root => api/regions
@@ -15,6 +16,7 @@ regionsRoutes.get('/geolocation', findRegionByCoordinates)
 
 regionsRoutes.get('/geolocation/all', getAllRegionsGeolocations)
 regionsRoutes.get('/geolocation/:region', getRegionGeolocation)
+regionsRoutes.get('/geolocation/find/:query', findRegionsGeolocations)
 
 regionsRoutes.get('/', getAllRegions)
 regionsRoutes.get('/:region', getRegion)
