@@ -14,9 +14,9 @@ const app = express();
 app.use(cors({
     mode: 'no-cors',
     credentials: true,
-    origin: process.env.FRONT_URL,
-    "Access-Control-Allow-Origin": process.env.FRONT_URL,
-    'allowedHeaders': ['sessionId', 'Content-Type', 'Authorization'],
+    origin: '*',
+    "Access-Control-Allow-Origin": '*',
+    'allowedHeaders': ['sessionId', 'Content-Type', 'Authorization', 'application'],
     'exposedHeaders': ['sessionId'],
     'methods': 'GET, OPTIONS, HEAD, PUT, PATCH, POST, DELETE',
     'preflightContinue': false,
@@ -28,10 +28,10 @@ app.use(bodyParser.urlencoded({
 }))
 app.use(bodyParser.json({ limit: '50mb' }))
 
-app.use('/api/locations', locationsRoutes)
-app.use('/api/departments', departmentsRoutes)
-app.use('/api/regions', regionsRoutes)
-app.use('/api/regions/new', newRegionsRoutes)
+app.use('/search/locations', locationsRoutes)
+app.use('/search/departments', departmentsRoutes)
+app.use('/search/regions', regionsRoutes)
+app.use('/search/regions/new', newRegionsRoutes)
 
 if (process.env.NODE_ENV !== 'production') {
     process.once('uncaughtException', err => {
