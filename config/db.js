@@ -9,7 +9,9 @@ const database = process.env.DATABASE.replace('<USER:PASSWORD>', process.env.DAT
 mongoose
     .connect(database, {
         useNewUrlParser: true,
-        useUnifiedTopology: true
+        useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
     })
     .then(() => {
         console.log('Connexion à la base de donnée réussie !')
