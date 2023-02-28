@@ -1,3 +1,4 @@
+import { isLatitude, isLongitude } from "../../utils/validation.utils.js"
 import DepartmentModel from "./departments.api.model.js"
 import DepartmentGeoJSONModel from "./departments.geojson.api.model.js"
 
@@ -89,6 +90,32 @@ export const findDepartmentByCoordinates = (req, res) => {
         return: req.query.return ? (req.query.return).toString() : "both"
     }
 
+    if (!req.query.lat) {
+        return res.status(400).json({ error: 'Le paramètre `lat` (latitude) est obligatoire pour effectuer une recherche géographique.' })
+    } else {
+        if (!isLatitude(req.query.lat)) {
+            return res.status(400).json({ error: 'Le paramètre `lat` n\'est pas valide.' })
+        }
+    }
+
+    if (!req.query.lon) {
+        return res.status(400).json({ error: 'Le paramètre `lon` (longitude) est obligatoire pour effectuer une recherche géographique.' })
+    } else {
+        if (!isLongitude(req.query.lon)) {
+            return res.status(400).json({ error: 'Le paramètre `lon` n\'est pas valide.' })
+        }
+    }
+
+    const timer = setTimeout(() => {
+        if (!res.headersSent) {
+            return res.status(400).json({ error: 'Aucun résultat trouvé. Les coordonnées ne correspondent peut-être pas au territoire français.' })
+        }
+    }, 15000)
+
+    if (res.headersSent) {
+        return () => clearTimeout(timer)
+    }
+
     DepartmentGeoJSONModel.aggregate([
         {
             $geoNear: {
@@ -105,15 +132,15 @@ export const findDepartmentByCoordinates = (req, res) => {
     ],
         (err, docs) => {
             if (!err) {
-                let array = []
+                let localities = []
                 let results = []
                 switch (queries.return) {
                     case 'geojson':
                         res.send(docs)
                         break;
                     case 'department':
-                        array = docs.map(value => { return new RegExp(value.properties.nom) });
-                        array.forEach((word, i) => {
+                        localities = docs.map(value => { return new RegExp(value.properties.nom) });
+                        localities.forEach((word, i) => {
                             DepartmentModel.findOne({
                                 "nom_departement": {
                                     $regex: word,
@@ -134,8 +161,8 @@ export const findDepartmentByCoordinates = (req, res) => {
                         })
                         break;
                     default:
-                        array = docs.map(value => { return new RegExp(value.properties.nom) });
-                        array.forEach((word, i) => {
+                        localities = docs.map(value => { return new RegExp(value.properties.nom) });
+                        localities.forEach((word, i) => {
                             DepartmentModel.findOne({
                                 "nom_departement": {
                                     $regex: word,

@@ -1,5 +1,6 @@
 import LocationModel from "./location.api.model.js"
 import LocationGeoJSONModel from './location.geojson.api.model.js'
+import { isLatitude, isLongitude } from "../../utils/validation.utils.js"
 
 /**
  * Get all locations
@@ -83,8 +84,34 @@ export const findLocationByCoordinates = (req, res) => {
         max_distance: req.query.max_distance ? Number(req.query.max_distance) : 0,
         min_distance: req.query.min_distance ? Number(req.query.min_distance) : 0,
         limit: req.query.limit ? Number(req.query.limit) : 15,
-        sort: req.query.sort ? (req.query.sort).toString() : 'fields.com_nom',
+        sort: req.query.sort ? (req.query.sort).toString() : 'properties.nom',
         return: req.query.return ? (req.query.return).toString() : "both"
+    }
+
+    if (!req.query.lat) {
+        return res.status(400).json({ error: 'Le paramètre `lat` (latitude) est obligatoire pour effectuer une recherche géographique.' })
+    } else {
+        if (!isLatitude(req.query.lat)) {
+            return res.status(400).json({ error: 'Le paramètre `lat` n\'est pas valide.' })
+        }
+    }
+
+    if (!req.query.lon) {
+        return res.status(400).json({ error: 'Le paramètre `lon` (longitude) est obligatoire pour effectuer une recherche géographique.' })
+    } else {
+        if (!isLongitude(req.query.lon)) {
+            return res.status(400).json({ error: 'Le paramètre `lon` n\'est pas valide.' })
+        }
+    }
+
+    const timer = setTimeout(() => {
+        if (!res.headersSent) {
+            return res.status(400).json({ error: 'Aucun résultat trouvé. Les coordonnées ne correspondent peut-être pas au territoire français.' })
+        }
+    }, 15000)
+
+    if (res.headersSent) {
+        return () => clearTimeout(timer)
     }
 
     LocationGeoJSONModel.aggregate([
@@ -98,20 +125,22 @@ export const findLocationByCoordinates = (req, res) => {
                 spherical: true,
                 maxDistance: queries.max_distance,
                 distanceMultiplier: 0.001
-            }
+            },
         }
     ],
         (err, docs) => {
             if (!err) {
-                let array = []
+                let localities = []
                 let results = []
                 switch (queries.return) {
                     case 'geojson':
                         res.send(docs)
                         break;
                     case 'location':
-                        array = docs.map(value => { return new RegExp(value.properties.nom) });
-                        array.forEach((word, i) => {
+                        localities = docs.map(value => {
+                            return new RegExp(value.properties.nom)
+                        });
+                        localities.forEach((word, i) => {
                             LocationModel.findOne({
                                 "fields.com_nom": {
                                     $regex: word,
@@ -132,8 +161,10 @@ export const findLocationByCoordinates = (req, res) => {
                         })
                         break;
                     default:
-                        array = docs.map(value => { return new RegExp(value.properties.nom) });
-                        array.forEach((word, i) => {
+                        localities = docs.map(value => {
+                            return new RegExp(value.properties.nom)
+                        });
+                        localities.forEach((word, i) => {
                             LocationModel.findOne({
                                 "fields.com_nom": {
                                     $regex: word,
@@ -161,6 +192,7 @@ export const findLocationByCoordinates = (req, res) => {
         })
         .sort(queries.sort)
         .limit(queries.limit)
+
 }
 
 /****************************************************************************/
