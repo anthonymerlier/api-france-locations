@@ -138,7 +138,7 @@ export const findDepartmentByCoordinates = (req, res) => {
                     case 'geojson':
                         res.send(docs)
                         break;
-                    case 'department':
+                    case 'informations':
                         localities = docs.map(value => { return new RegExp(value.properties.nom) });
                         localities.forEach((word, i) => {
                             DepartmentModel.findOne({

@@ -138,7 +138,7 @@ export const findNewRegionByCoordinates = (req, res) => {
                     case 'geojson':
                         res.send(docs[0])
                         break;
-                    case 'region':
+                    case 'informations':
                         localities = docs.map(value => { return new RegExp(value.properties.nom) });
                         localities.forEach((word, i) => {
                             NewRegionModel.findOne({
