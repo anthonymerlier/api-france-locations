@@ -130,22 +130,19 @@ export const findLocationByCoordinates = (req, res) => {
     ],
         (err, docs) => {
             if (!err) {
-                let localities = []
                 let results = []
                 switch (queries.return) {
                     case 'geojson':
                         res.send(docs)
                         break;
-                    case 'location':
-                        localities = docs.map(value => {
-                            return new RegExp(value.properties.nom)
-                        });
-                        localities.forEach((word, i) => {
+                    case 'informations':
+                        docs.forEach((doc, i) => {
                             LocationModel.findOne({
                                 "fields.com_nom": {
-                                    $regex: word,
+                                    $regex: doc.properties.nom,
                                     $options: "i"
-                                }
+                                },
+                                "fields.com_code": doc.properties.code,
                             },
                                 (err, result) => {
                                     if (!err) {
@@ -161,15 +158,13 @@ export const findLocationByCoordinates = (req, res) => {
                         })
                         break;
                     default:
-                        localities = docs.map(value => {
-                            return new RegExp(value.properties.nom)
-                        });
-                        localities.forEach((word, i) => {
+                        docs.forEach((doc, i) => {
                             LocationModel.findOne({
                                 "fields.com_nom": {
-                                    $regex: word,
+                                    $regex: doc.properties.nom,
                                     $options: "m"
-                                }
+                                },
+                                "fields.com_code": doc.properties.code,
                             },
                                 (err, result) => {
                                     if (!err) {
