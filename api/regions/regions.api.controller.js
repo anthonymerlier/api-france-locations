@@ -1,6 +1,6 @@
 import RegionModel from "./regions.api.model.js"
 import RegionGeoJSONModel from "./regions.geojson.api.model.js"
-import { convertStringToRegexp, isDecimalDegreeLatitude, isDecimalDegreeLongitude } from "../../utils/validation.utils.js"
+import { containsOnlyNumbers, containsSpecialChars, convertStringToRegexp, isDecimalDegreeLatitude, isDecimalDegreeLongitude, sanitize } from "../../utils/validation.utils.js"
 
 /**
  * Get all regions
@@ -21,9 +21,11 @@ export const getAllRegions = (req, res) => {
  */
 
 export const getRegion = (req, res) => {
+    const query = sanitize(req.params.query)
+
     RegionModel.find({
         $text: {
-            $search: req.params.query,
+            $search: query,
         },
     },
         (err, docs) => {
@@ -45,11 +47,12 @@ export const getRegion = (req, res) => {
 
 export const findRegions = (req, res) => {
     const queries = {
-        limit: req.query.limit ? Number(req.query.limit) : 15,
-        sort: req.query.sort ? (req.query.sort).toString() : 'nom_region'
+        limit: req.query.limit ? sanitize(Number(req.query.limit)) : 15,
+        sort: req.query.sort ? sanitize((req.query.sort).toString()) : 'nom_region'
     }
 
-    const query = convertStringToRegexp(req.params.query)
+    const sanitized = sanitize(req.params.query)
+    const query = convertStringToRegexp(sanitized)
 
     RegionModel.find({
         "nom_region": {
@@ -85,9 +88,11 @@ export const getAllRegionsGeolocations = (req, res) => {
  */
 
 export const getRegionGeolocation = (req, res) => {
-    RegionGeoJSONModel.findOne({
+    const query = sanitize(req.params.query)
+
+    RegionGeoJSONModel.find({
         $text: {
-            $search: req.params.query,
+            $search: query,
         },
     },
         (err, docs) => {
@@ -109,11 +114,12 @@ export const getRegionGeolocation = (req, res) => {
 
 export const findRegionsGeolocations = (req, res) => {
     const queries = {
-        limit: req.query.limit ? Number(req.query.limit) : 10,
-        sort: req.query.sort ? (req.query.sort).toString() : 'properties.nom'
+        limit: req.query.limit ? sanitize(Number(req.query.limit)) : 10,
+        sort: req.query.sort ? sanitize((req.query.sort).toString()) : 'properties.nom'
     }
 
-    const query = convertStringToRegexp(req.params.query)
+    const sanitized = sanitize(req.params.query)
+    const query = convertStringToRegexp(sanitized)
 
     RegionGeoJSONModel.find({
         "properties.nom": {
@@ -154,6 +160,20 @@ export const findRegionByCoordinates = (req, res) => {
         return: req.query.return ? (req.query.return).toString() : "both"
     }
 
+    for (const [key,value] of Object.entries(req.query)) {
+        if (typeof value !== 'string' && typeof value !== 'number') {
+            if (Array.isArray(value)) {
+                return res.status(400).json({ error: `Le paramètre '${key}' ne peut pas être spécifié deux fois.` })
+            } else {
+                return res.status(400).json({ error: `Le paramètre '${key}' n\'est pas valide.` })
+            }
+        } else {
+            if (containsSpecialChars(value)) {
+                return res.status(400).json({ error: `Le paramètre '${key}' n\'est pas valide.` })
+            }
+        }
+    }
+
     if (!req.query.lat) {
         return res.status(400).json({ error: 'Le paramètre `lat` (latitude) est obligatoire pour effectuer une recherche géographique.' })
     } else {
@@ -167,6 +187,24 @@ export const findRegionByCoordinates = (req, res) => {
     } else {
         if (!isDecimalDegreeLongitude(req.query.lon)) {
             return res.status(400).json({ error: 'Le paramètre `lon` n\'est pas valide.' })
+        }
+    }
+
+    if (req.query.limit) {
+        if (!containsOnlyNumbers(req.query.limit)) {
+            return res.status(400).json({ error: 'Le paramètre `limit` n\'est pas valide.' })
+        }
+    }
+
+    if (req.query.max_distance) {
+        if (!containsOnlyNumbers(req.query.max_distance)) {
+            return res.status(400).json({ error: 'Le paramètre `max_distance` n\'est pas valide.' })
+        }
+    }
+
+    if (req.query.return) {
+        if (req.query.return !== 'both' && req.query.return !== 'informations' && req.query.return !== 'geojson') {
+            return res.status(400).json({ error: `La valeur du paramètre 'return' n\'est pas valide.` })
         }
     }
 
