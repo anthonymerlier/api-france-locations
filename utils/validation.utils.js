@@ -42,3 +42,46 @@ export const convertStringToRegexp = (text) => {
         .replace(/-|\s/g, '[ -]') // replace spaces and hyphens
     return new RegExp(regexp, 'i'); // "i" -> ignore case
 };
+
+/**
+ * Check if string contains only letter.
+ * @param {*} string String to check
+ */
+
+export const containsOnlyLetters = (string) => {
+    const regexp = new RegExp(/^[a-zA-Z]*$/)
+    if (regexp.test(string)) return true
+    else return false
+}
+
+/**
+ * Check if string contains only numbers.
+ * @param {*} string String to check
+ */
+
+export const containsOnlyNumbers = (string) => {
+    const regexp = new RegExp(/^[0-9]*$/)
+    if (regexp.test(string)) return true
+    else return false
+}
+
+/**
+ * Check if string contains special chars except dots.
+ * @param {*} string String to check
+ */
+
+export const containsSpecialChars = (string) => {
+    const regexp = new RegExp(/[`!@#$%^&*()_+\-=\[\]{};':"\\|,<>\/?~]/)
+    if (regexp.test(string)) return true
+    else return false
+}
+
+/**
+ * Replace all special chars except hyphens and dots
+ * @param {*} string String to sanitize
+ */
+
+export const sanitize = (string) => {
+    const sanitized = string.replace(/[&\/\\#,+()$~%'":_*?<>{}]/g, '')
+    return sanitized
+}
