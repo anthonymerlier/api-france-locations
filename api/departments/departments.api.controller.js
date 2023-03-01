@@ -1,6 +1,6 @@
-import { isLatitude, isLongitude } from "../../utils/validation.utils.js"
 import DepartmentModel from "./departments.api.model.js"
 import DepartmentGeoJSONModel from "./departments.geojson.api.model.js"
+import { convertStringToRegexp, isDecimalDegreeLatitude, isDecimalDegreeLongitude } from "../../utils/validation.utils.js"
 
 /**
  * Get all departments
@@ -18,22 +18,22 @@ export const getAllDepartments = (req, res) => {
 
 /**
  * Get department by name
- * @param {string} department - Name of the department
+ * @param {string} query - Name of the department
  */
 
 export const getDepartment = (req, res) => {
-    DepartmentModel.findOne({
-        "nom_departement": {
-            $regex: encodeURI(req.params.department),
-            $options: "i"
-        }
+    DepartmentModel.find({
+        $text: {
+            $search: req.params.query,
+        },
     },
         (err, docs) => {
             if (!err)
                 res.send(docs)
             else console.error(err)
         })
-        .sort('nom_departement')
+        .sort({ score: { $meta: "textScore" } })
+        .limit(1)
         .select()
 }
 
@@ -50,11 +50,12 @@ export const findDepartments = (req, res) => {
         sort: req.query.sort ? (req.query.sort).toString() : 'nom_departement'
     }
 
+    const query = convertStringToRegexp(req.params.query)
+
     DepartmentModel.find({
         "nom_departement": {
-            $regex: encodeURI(req.params.query),
-            $options: "i"
-        }
+            $regex: query
+        },
     },
         (err, docs) => {
             if (!err)
@@ -66,16 +67,80 @@ export const findDepartments = (req, res) => {
 }
 
 /**
+ * Get all departments geolocations
+ */
+
+export const getAllDepartmentsGeolocations = (req, res) => {
+    DepartmentGeoJSONModel.find({}, (err, docs) => {
+        if (!err) {
+            res.send(docs)
+        } else {
+            console.log('Error to get data => ' + err)
+        }
+    })
+}
+
+/**
+ * Get departments geolocation by department name
+ * @param {string} query - Name of the department
+ */
+
+export const getDepartmentGeolocation = (req, res) => {
+    DepartmentGeoJSONModel.find({
+        $text: {
+            $search: req.params.query,
+        },
+    },
+        (err, docs) => {
+            if (!err)
+                res.send(docs)
+            else console.error(err)
+        })
+        .sort({ score: { $meta: "textScore" } })
+        .limit(1)
+        .select()
+}
+
+/**
+ * Find departments from query
+ * @param {*} query - Query to find departments
+ * @param {*} limit - Limit the number of element returned (?limit=)
+ * @param {*} sort - Sort the response by this field (?sort=)
+ */
+
+export const findDepartmentsGeolocations = (req, res) => {
+    const queries = {
+        limit: req.query.limit ? Number(req.query.limit) : 10,
+        sort: req.query.sort ? (req.query.sort).toString() : 'properties.nom'
+    }
+
+    const query = convertStringToRegexp(req.params.query)
+
+    DepartmentGeoJSONModel.find({
+        "properties.nom": {
+            $regex: query
+        },
+    },
+        (err, docs) => {
+            if (!err)
+                return res.send(docs)
+            else console.error(err)
+        })
+        .sort(queries.sort)
+        .limit(queries.limit)
+}
+
+/**
  * Find departments by coordinates
  * @param {number} latitude - Latitude coord
  * @param {number} longitude - Longitude coord
- * @param {number} max_distance - Max distance around location point in meters (?max_distance=), default to 0.
- * @param {number} min_distance - Min distance arounded location point in meters (?min_distance=), default to 0.
- * @param {number} limit - Limit the number of element returned (?limit=), default to 1.
- * @param {string} sort - Sort the response by this field (?sort=)
- * @param {string} return - Choose the element that should be returned. Default to `both` (?return=).
+ * @param {number} max_distance - Max distance around location point in meters `&max_distance=`, default to 0.
+ * @param {number} min_distance - Min distance arounded location point in meters `&min_distance=`, default to 0.
+ * @param {number} limit - Limit the number of element returned `&limit=`, default to 1.
+ * @param {string} sort - Sort the response by this field `&sort=`.
+ * @param {string} return - Choose the element that should be returned. Default to `both` `&return=`.
  * - `geojson` will return department geojson only
- * - `department` will return the department informations only
+ * - `informations` will return the department informations only
  * - `both` will return an object containing geojson and department informations
  */
 
@@ -93,7 +158,7 @@ export const findDepartmentByCoordinates = (req, res) => {
     if (!req.query.lat) {
         return res.status(400).json({ error: 'Le paramètre `lat` (latitude) est obligatoire pour effectuer une recherche géographique.' })
     } else {
-        if (!isLatitude(req.query.lat)) {
+        if (!isDecimalDegreeLatitude(req.query.lat)) {
             return res.status(400).json({ error: 'Le paramètre `lat` n\'est pas valide.' })
         }
     }
@@ -101,7 +166,7 @@ export const findDepartmentByCoordinates = (req, res) => {
     if (!req.query.lon) {
         return res.status(400).json({ error: 'Le paramètre `lon` (longitude) est obligatoire pour effectuer une recherche géographique.' })
     } else {
-        if (!isLongitude(req.query.lon)) {
+        if (!isDecimalDegreeLongitude(req.query.lon)) {
             return res.status(400).json({ error: 'Le paramètre `lon` n\'est pas valide.' })
         }
     }
@@ -187,73 +252,6 @@ export const findDepartmentByCoordinates = (req, res) => {
             else {
                 console.error(err)
             }
-        })
-        .sort(queries.sort)
-        .limit(queries.limit)
-}
-
-/****************************************************************************/
-/****************************************************************************/
-/****************************************************************************/
-
-/**
- * Get all departments geolocations
- */
-
-export const getAllDepartmentsGeolocations = (req, res) => {
-    DepartmentGeoJSONModel.find({}, (err, docs) => {
-        if (!err) {
-            res.send(docs)
-        } else {
-            console.log('Error to get data => ' + err)
-        }
-    })
-}
-
-/**
- * Get departments geolocation by department name
- * @param {string} department - Name of the department
- */
-
-export const getDepartmentGeolocation = (req, res) => {
-    DepartmentGeoJSONModel.findOne({
-        'properties.nom': {
-            $regex: encodeURI(req.params.department),
-            $options: "i"
-        }
-    },
-        (err, docs) => {
-            if (!err)
-                res.send(docs)
-            else console.error(err)
-        })
-        .sort('properties.nom')
-        .select()
-}
-
-/**
- * Find departments from query
- * @param {*} query - Query to find departments
- * @param {*} limit - Limit the number of element returned (?limit=)
- * @param {*} sort - Sort the response by this field (?sort=)
- */
-
-export const findDepartmentsGeolocations = (req, res) => {
-    const queries = {
-        limit: req.query.limit ? Number(req.query.limit) : 10,
-        sort: req.query.sort ? (req.query.sort).toString() : 'properties.nom'
-    }
-
-    DepartmentGeoJSONModel.find({
-        "properties.nom": {
-            $regex: encodeURI(req.params.query),
-            $options: "i"
-        }
-    },
-        (err, docs) => {
-            if (!err)
-                return res.send(docs)
-            else console.error(err)
         })
         .sort(queries.sort)
         .limit(queries.limit)
