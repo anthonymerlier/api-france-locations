@@ -15,11 +15,11 @@ import {
 departmentsRoutes.get('/geolocation', findDepartmentByCoordinates)
 
 departmentsRoutes.get('/geolocation/all', getAllDepartmentsGeolocations)
-departmentsRoutes.get('/geolocation/:department', getDepartmentGeolocation)
+departmentsRoutes.get('/geolocation/:query', getDepartmentGeolocation)
 departmentsRoutes.get('/geolocation/find/:query', findDepartmentsGeolocations)
 
 departmentsRoutes.get('/', getAllDepartments)
-departmentsRoutes.get('/:department', getDepartment)
+departmentsRoutes.get('/:query', getDepartment)
 departmentsRoutes.get('/find/:query', findDepartments)
 
 export default departmentsRoutes;
