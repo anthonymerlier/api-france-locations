@@ -3,8 +3,7 @@ const locationsRoutes = express.Router()
 import {
     getAllLocations,
     getLocation,
-    findLocation,
-    getAllGeolocations,
+    findLocations,
     getGeolocation,
     findLocationByCoordinates,
     findGeolocations
@@ -14,12 +13,11 @@ import {
 
 locationsRoutes.get('/geolocation', findLocationByCoordinates)
 
-locationsRoutes.get('/geolocation/all', getAllGeolocations)
-locationsRoutes.get('/geolocation/:location', getGeolocation)
+locationsRoutes.get('/geolocation/:query', getGeolocation)
 locationsRoutes.get('/geolocation/find/:query', findGeolocations)
 
 locationsRoutes.get('/', getAllLocations)
-locationsRoutes.get('/:location', getLocation)
-locationsRoutes.get('/find/:query', findLocation)
+locationsRoutes.get('/:query', getLocation)
+locationsRoutes.get('/find/:query', findLocations)
 
 export default locationsRoutes;
