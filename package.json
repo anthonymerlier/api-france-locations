@@ -1,21 +1,39 @@
 {
-  "name": "api-france-locations",
-  "version": "1.0.0",
-  "description": "An API for querying for france locations build with express and mongoose",
-  "main": "server.js",
-  "type": "module",
-  "scripts": {
-    "start": "nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Alexandre Vurbier",
-  "license": "ISC",
-  "dependencies": {
-    "body-parser": "^1.20.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2",
-    "mongoose": "^6.9.0",
-    "nodemon": "^2.0.20"
-  }
+    "name": "api-france-locations",
+    "version": "0.1.0",
+    "description": "An API for querying for france locations build with express and mongoose",
+    "main": "server.js",
+    "type": "module",
+    "scripts": {
+        "start": "nodemon server.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Alexandre Vurbier",
+    "license": "ISC",
+    "dependencies": {
+        "body-parser": "^1.20.1",
+        "cors": "^2.8.5",
+        "dotenv": "^16.0.3",
+        "express": "^4.18.2",
+        "mongoose": "^6.9.0",
+        "nodemon": "^2.0.20"
+    },
+    "keywords": [
+        "api",
+        "france",
+        "locations",
+        "geojson",
+        "json",
+        "express",
+        "mongoose",
+        "mongodb"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Juralexx/api-france-locations.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Juralexx/api-france-locations/issues"
+    },
+    "homepage": "https://github.com/Juralexx/api-france-locations#readme"
 }
