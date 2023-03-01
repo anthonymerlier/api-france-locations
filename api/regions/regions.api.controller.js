@@ -1,6 +1,6 @@
-import { isLatitude, isLongitude } from "../../utils/validation.utils.js"
 import RegionModel from "./regions.api.model.js"
 import RegionGeoJSONModel from "./regions.geojson.api.model.js"
+import { convertStringToRegexp, isDecimalDegreeLatitude, isDecimalDegreeLongitude } from "../../utils/validation.utils.js"
 
 /**
  * Get all regions
@@ -17,22 +17,22 @@ export const getAllRegions = (req, res) => {
 
 /**
  * Get region by name
- * @param {string} region - Name of the region
+ * @param {string} query - Name of the region
  */
 
 export const getRegion = (req, res) => {
-    RegionModel.findOne({
-        "nom_region": {
-            $regex: encodeURI(req.params.region),
-            $options: "i"
-        }
+    RegionModel.find({
+        $text: {
+            $search: req.params.query,
+        },
     },
         (err, docs) => {
             if (!err)
                 res.send(docs)
             else console.error(err)
         })
-        .sort('nom_region')
+        .sort({ score: { $meta: "textScore" } })
+        .limit(1)
         .select()
 }
 
@@ -49,10 +49,11 @@ export const findRegions = (req, res) => {
         sort: req.query.sort ? (req.query.sort).toString() : 'nom_region'
     }
 
+    const query = convertStringToRegexp(req.params.query)
+
     RegionModel.find({
         "nom_region": {
-            $regex: encodeURI(req.params.query),
-            $options: "i"
+            $regex: query
         }
     },
         (err, docs) => {
@@ -65,16 +66,80 @@ export const findRegions = (req, res) => {
 }
 
 /**
+ * Get all regions geolocations
+ */
+
+export const getAllRegionsGeolocations = (req, res) => {
+    RegionGeoJSONModel.find({}, (err, docs) => {
+        if (!err) {
+            res.send(docs)
+        } else {
+            console.log('Error to get data => ' + err)
+        }
+    })
+}
+
+/**
+ * Get region geolocation by region name
+ * @param {string} query - Name of the region
+ */
+
+export const getRegionGeolocation = (req, res) => {
+    RegionGeoJSONModel.findOne({
+        $text: {
+            $search: req.params.query,
+        },
+    },
+        (err, docs) => {
+            if (!err)
+                res.send(docs)
+            else console.error(err)
+        })
+        .sort({ score: { $meta: "textScore" } })
+        .limit(1)
+        .select()
+}
+
+/**
+ * Find location from query
+ * @param {*} query - Query to find locations
+ * @param {*} limit - Limit the number of element returned (?limit=)
+ * @param {*} sort - Sort the response by this field (?sort=)
+ */
+
+export const findRegionsGeolocations = (req, res) => {
+    const queries = {
+        limit: req.query.limit ? Number(req.query.limit) : 10,
+        sort: req.query.sort ? (req.query.sort).toString() : 'properties.nom'
+    }
+
+    const query = convertStringToRegexp(req.params.query)
+
+    RegionGeoJSONModel.find({
+        "properties.nom": {
+            $regex: query
+        }
+    },
+        (err, docs) => {
+            if (!err)
+                return res.send(docs)
+            else console.error(err)
+        })
+        .sort(queries.sort)
+        .limit(queries.limit)
+}
+
+/**
  * Find regions by coordinates
  * @param {number} latitude - Latitude coord
  * @param {number} longitude - Longitude coord
- * @param {number} max_distance - Max distance around location point in meters (?max_distance=), default to 0.
- * @param {number} min_distance - Min distance arounded location point in meters (?min_distance=), default to 0.
- * @param {number} limit - Limit the number of element returned (?limit=), default to 1.
- * @param {string} sort - Sort the response by this field (?sort=)
- * @param {string} return - Choose the element that should be returned. Default to `both` (?return=).
+ * @param {number} max_distance - Max distance around location point in meters `&max_distance=`, default to 0.
+ * @param {number} min_distance - Min distance arounded location point in meters `&min_distance=`, default to 0.
+ * @param {number} limit - Limit the number of element returned `&limit=`, default to 1.
+ * @param {string} sort - Sort the response by this field `&sort=`
+ * @param {string} return - Choose the element that should be returned `&return=`. Default to `both`.
  * - `geojson` will return region geojson only
- * - `department` will return the region informations only
+ * - `informations` will return the region informations only
  * - `both` will return an object containing geojson and region informations
  */
 
@@ -92,7 +157,7 @@ export const findRegionByCoordinates = (req, res) => {
     if (!req.query.lat) {
         return res.status(400).json({ error: 'Le paramètre `lat` (latitude) est obligatoire pour effectuer une recherche géographique.' })
     } else {
-        if (!isLatitude(req.query.lat)) {
+        if (!isDecimalDegreeLatitude(req.query.lat)) {
             return res.status(400).json({ error: 'Le paramètre `lat` n\'est pas valide.' })
         }
     }
@@ -100,7 +165,7 @@ export const findRegionByCoordinates = (req, res) => {
     if (!req.query.lon) {
         return res.status(400).json({ error: 'Le paramètre `lon` (longitude) est obligatoire pour effectuer une recherche géographique.' })
     } else {
-        if (!isLongitude(req.query.lon)) {
+        if (!isDecimalDegreeLongitude(req.query.lon)) {
             return res.status(400).json({ error: 'Le paramètre `lon` n\'est pas valide.' })
         }
     }
@@ -190,72 +255,3 @@ export const findRegionByCoordinates = (req, res) => {
         .sort(queries.sort)
         .limit(queries.limit)
 }
-
-/****************************************************************************/
-/****************************************************************************/
-/****************************************************************************/
-
-/**
- * Get all regions geolocations
- */
-
-export const getAllRegionsGeolocations = (req, res) => {
-    RegionGeoJSONModel.find({}, (err, docs) => {
-        if (!err) {
-            res.send(docs)
-        } else {
-            console.log('Error to get data => ' + err)
-        }
-    })
-}
-
-/**
- * Get region geolocation by region name
- * @param {string} region - Name of the region
- */
-
-export const getRegionGeolocation = (req, res) => {
-    RegionGeoJSONModel.findOne({
-        'properties.nom': {
-            $regex: encodeURI(req.params.region),
-            $options: "i"
-        }
-    },
-        (err, docs) => {
-            if (!err)
-                res.send(docs)
-            else console.error(err)
-        })
-        .sort('properties.nom')
-        .select()
-}
-
-/**
- * Find location from query
- * @param {*} query - Query to find locations
- * @param {*} limit - Limit the number of element returned (?limit=)
- * @param {*} sort - Sort the response by this field (?sort=)
- */
-
-export const findRegionsGeolocations = (req, res) => {
-    const queries = {
-        limit: req.query.limit ? Number(req.query.limit) : 10,
-        sort: req.query.sort ? (req.query.sort).toString() : 'properties.nom'
-    }
-
-    RegionGeoJSONModel.find({
-        "properties.nom": {
-            $regex: encodeURI(req.params.query),
-            $options: "i"
-        }
-    },
-        (err, docs) => {
-            if (!err)
-                return res.send(docs)
-            else console.error(err)
-        })
-        .sort(queries.sort)
-        .limit(queries.limit)
-}
-
-//`\\b(^|\\s|[^\\W])${encodeURI(req.params.region)}(\\s|[^\\W]|$)\\b`
