@@ -144,7 +144,7 @@ Méthode : `GET`
 Point d'entrée : `/search`
 
 | Nom    | Description                                                   | Type   |
-|--------|---------------------------------------------------------------|--------|
+|:-------|:--------------------------------------------------------------|:-------|
 | :type  | Type d'élément(s) recherché(s)                                | string |
 | :query | Chaine de caractères recherchée                               | string |
 | /find/ | Paramètre de recherche retournant un tableau (autocomplétion) | string |
@@ -157,7 +157,7 @@ Méthode : `GET`
 Point d'entrée : `/search/:type/geolocation`
 
 | Nom    | Description                                                   | Type   |
-|--------|---------------------------------------------------------------|--------|
+|:-------|:--------------------------------------------------------------|:-------|
 | :type  | Type d'élément(s) recherché(s)                                | string |
 | :query | Chaine de caractères recherchée                               | string |
 | /find/ | Paramètre de recherche retournant un tableau (autocomplétion) | string |
@@ -170,7 +170,7 @@ Méthode : `GET`
 Point d'entrée : `/search/:type/geolocation`
 
 | Nom          | Description                                                   | Type   |
-|--------------|---------------------------------------------------------------|--------|
+|:-------------|:--------------------------------------------------------------|:-------|
 | :type        | Type d'élément(s) recherché(s)                                | string |
 | lat          | Latitude (en degrés décimales)                                | string |
 | lon          | Longitude (en degrés décimales)                               | string |
