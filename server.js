@@ -27,11 +27,11 @@ app.use(cors({
 app.use(helmet())
 
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
+    windowMs: 60 * 1000,
     max: 150,
     standardHeaders: true,
     legacyHeaders: false,
-    message: 'Too Many Request from this IP, please try again in an 15 minutes'
+    message: 'Too Many Request from this IP, your IP has been blocked. Please try again later.'
 })
 
 app.use(limiter)
