@@ -22,7 +22,7 @@ Le type de recherche est nécessaire pour l'ensemble des APIs (récupérer les i
 Pour les types `departments`, `regions` et `new-regions`, une requête à la racine de l'url retourne l'ensemble des éléments.
 
 ```code
-http://localhost:5000/search/:type
+https://france-locations.api.alexandrevurbier.com/search/:type
 ```
 
 ---
@@ -34,25 +34,25 @@ Cette API permet de récupérer au format JSON les informations de communes, dé
 Le paramètre `query` défini une recherche de plein texte, cette requete retourne le premier élément correspondant trouvé :
 
 ```code
-http://localhost:5000/search/locations/:query
+https://france-locations.api.alexandrevurbier.com/search/locations/:query
 ```
 
 Le paramètre `find` défini une recherche retournant un tableau (autocomplétion) comprenant tous les éléments correspondants trouvés :
 
 ```code
-http://localhost:5000/search/locations/find/:query
+https://france-locations.api.alexandrevurbier.com/search/locations/find/:query
 ```
 
 Avec `limit` on peut contrôler le nombre maximum d’éléments retournés, le nombre maximum d'éléments retournés est de 100 :
 
 ```code
-http://localhost:5000/search/locations/find/:query?limit=10
+https://france-locations.api.alexandrevurbier.com/search/locations/find/:query?limit=10
 ```
 
 Avec `sort` on peut trier les éléments retournés ([cf. structure des données](#structure-des-donn%C3%A9es)) :
 
 ```code
-http://localhost:5000/search/locations/find/:query?sort=fields.com_nom
+https://france-locations.api.alexandrevurbier.com/search/locations/find/:query?sort=fields.com_nom
 ```
 
 ---
@@ -66,31 +66,31 @@ Le retour est un GeoJSON ***FeatureCollection***.
 Le paramètre `geolocation` correspond à la racine d'une recherche de coordonnées géographiques :
 
 ```code
-http://localhost:5000/search/locations/geolocation
+https://france-locations.api.alexandrevurbier.com/search/locations/geolocation
 ```
 
 Le paramètre `query` défini une recherche de plein texte, cette requete retourne le premier élément correspondant trouvé :
 
 ```code
-http://localhost:5000/search/locations/geolocation/:query
+https://france-locations.api.alexandrevurbier.com/search/locations/geolocation/:query
 ```
 
 Le paramètre `find` défini une recherche retournant un tableau (autocomplétion) comprenant tous les éléments correspondants trouvés :
 
 ```code
-http://localhost:5000/search/locations/geolocation/find/:query
+https://france-locations.api.alexandrevurbier.com/search/locations/geolocation/find/:query
 ```
 
 Avec `limit` on peut contrôler le nombre maximum d’éléments retournés, le nombre maximum d'éléments retournés est de 100 :
 
 ```code
-http://localhost:5000/search/locations/geolocation/find/:query?limit=7
+https://france-locations.api.alexandrevurbier.com/search/locations/geolocation/find/:query?limit=7
 ```
 
 Avec sort on peut trier les éléments retournés ([cf. structure des données](#structure-des-donn%C3%A9es)) :
 
 ```code
-http://localhost:5000/search/locations/geolocation/find/:query?sort=properties.nom
+https://france-locations.api.alexandrevurbier.com/search/locations/geolocation/find/:query?sort=properties.nom
 ```
 
 ---
@@ -109,19 +109,19 @@ Les paramètres `lat` et `lon` doivent être au format degrés décimaux (DD). E
 Par default le paramètre `max_distance` étant à 0, cette requête retournera l'élément correspondant aux coordonnées `lat` et `lon` :
 
 ```code
-http://localhost:5000/search/locations/geolocation?lat=46.535569558508044&lon=5.376471889399545
+https://france-locations.api.alexandrevurbier.com/search/locations/geolocation?lat=46.535569558508044&lon=5.376471889399545
 ```
 
 Pour retourner un tableau d'éléments correspondant à un périmètre de recherche, ajouter le paramètre `max_distance`. Sa valeur est exprimée en mètres (ex : 5000 = 5km) :
 
 ```code
-http://localhost:5000/search/locations/geolocation?lat=46.5355644&lon=5.3764545&max_distance=5000
+https://france-locations.api.alexandrevurbier.com/search/locations/geolocation?lat=46.5355644&lon=5.3764545&max_distance=5000
 ```
 
 Avec `limit` et `sort` on peut contrôler et trier le nombre d’éléments retournés, le nombre maximum d'éléments retournés est de 100 :
 
 ```code
-http://localhost:5000/search/locations/geolocation?lat=46.5344&lon=5.3545&limit=5&sort=fields.com_nom
+https://france-locations.api.alexandrevurbier.com/search/locations/geolocation?lat=46.5344&lon=5.3545&limit=5&sort=fields.com_nom
 ```
 
 Le paramètre `return` défini le type d'élément retourné, par default sa valeur est `both`, la requête retourne les informations et les coordonnées des éléments au format GeoJSON.
@@ -133,7 +133,7 @@ Les valeurs suivantes de return retournent :
 * `informations` : informations uniquement
 
 ```code
-http://localhost:5000/search/locations/geolocation?lat=46.5344&lon=5.3545&return=geojson
+https://france-locations.api.alexandrevurbier.com/search/locations/geolocation?lat=46.5344&lon=5.3545&return=geojson
 ```
 
 ## Documentation technique
