@@ -5,7 +5,7 @@
     "main": "server.js",
     "type": "module",
     "scripts": {
-        "start": "nodemon server.js",
+        "start": "node server.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Alexandre Vurbier",
@@ -38,5 +38,5 @@
     "bugs": {
         "url": "https://github.com/Juralexx/api-france-locations/issues"
     },
-    "homepage": "https://github.com/Juralexx/api-france-locations#readme"
+    "homepage": "https://api-communes.onrender.com"
 }
